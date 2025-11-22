@@ -2,7 +2,7 @@
 
 All notable changes to the Antigravity Unity IDE Integration package will be documented in this file.
 
-## [1.0.0] - 2025-11-22
+## [0.1.0] - 2025-11-22
 
 ### Added
 - Initial release of Antigravity Unity IDE Integration

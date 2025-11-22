@@ -90,17 +90,25 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			var candidates = new List<string>();
 
 #if UNITY_EDITOR_WIN
-			var localAppPath = IOPath.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs");
+			var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+			var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+			var programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
 
-			candidates.Add(IOPath.Combine(localAppPath, "Antigravity", "Antigravity.exe"));
+			// Standard installation paths
+			candidates.Add(IOPath.Combine(localAppData, "Programs", "Antigravity", "Antigravity.exe"));
+			candidates.Add(IOPath.Combine(localAppData, "Antigravity", "Antigravity.exe"));
+			candidates.Add(IOPath.Combine(programFiles, "Antigravity", "Antigravity.exe"));
+			candidates.Add(IOPath.Combine(programFilesX86, "Antigravity", "Antigravity.exe"));
 #elif UNITY_EDITOR_OSX
 			var appPath = IOPath.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
 			candidates.AddRange(Directory.EnumerateDirectories(appPath, "Antigravity*.app"));
+			candidates.AddRange(Directory.EnumerateDirectories(Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Applications", "Antigravity*.app"));
 #elif UNITY_EDITOR_LINUX
 			// Well known locations
 			candidates.Add("/usr/bin/antigravity");
 			candidates.Add("/bin/antigravity");
 			candidates.Add("/usr/local/bin/antigravity");
+			candidates.Add("/snap/bin/antigravity");
 #endif
 
 			foreach (var candidate in candidates.Distinct())
@@ -112,38 +120,86 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 		public override void CreateExtraFiles(string projectDirectory)
 		{
-			// Antigravity doesn't need special configuration files like VS Code
-			// But we could create .antigravity folder here if needed in the future
+			// Create .vscode/settings.json to hide .meta files and configure workspace
+			// We use .vscode because most Electron-based editors (like Cursor) support it
+			var vscodeDirectory = IOPath.Combine(projectDirectory, ".vscode");
+
+			if (!Directory.Exists(vscodeDirectory))
+				Directory.CreateDirectory(vscodeDirectory);
+
+			var settingsFile = IOPath.Combine(vscodeDirectory, "settings.json");
+			
+			// Only create if it doesn't exist to avoid overwriting user settings
+			if (!File.Exists(settingsFile))
+			{
+				const string content = @"{
+    ""files.exclude"": {
+        ""**/*.meta"": true,
+        ""**/*.unity"": true,
+        ""**/*.prefab"": true,
+        ""**/*.asset"": true,
+        ""Library/"": true,
+        ""ProjectSettings/"": true,
+        ""Temp/"": true
+    },
+    ""files.associations"": {
+        ""*.asset"": ""yaml"",
+        ""*.meta"": ""yaml"",
+        ""*.prefab"": ""yaml"",
+        ""*.unity"": ""yaml""
+    }
+}";
+				File.WriteAllText(settingsFile, content);
+			}
 		}
 
 		public override bool Open(string path, int line, int column, string solution)
 		{
 			var application = Path;
+			var directory = IOPath.GetDirectoryName(solution);
+			var workspace = directory; // Use the solution directory as workspace
 
 			line = Math.Max(1, line);
 			column = Math.Max(0, column);
 
-			var directory = IOPath.GetDirectoryName(solution);
-
 #if UNITY_EDITOR_WIN
-			// On Windows, open file with line and column parameters
-			var arguments = string.IsNullOrEmpty(path)
-				? $"\"{directory}\""
-				: $"\"{path}\" --line {line} --column {column}";
+			// Open workspace (directory) AND specific file
+			// Format: "executable" "workspace_path" -g "file_path":line:column
+			// This is the standard VS Code / Cursor format
+			
+			string arguments;
+			if (string.IsNullOrEmpty(path))
+			{
+				arguments = $"\"{workspace}\"";
+			}
+			else
+			{
+				arguments = $"\"{workspace}\" -g \"{path}\":{line}:{column}";
+			}
 
 			var startInfo = ProcessRunner.ProcessStartInfoFor(application, arguments, redirect: false);
 #elif UNITY_EDITOR_OSX
-			// On macOS, wrap with open command
-			var arguments = string.IsNullOrEmpty(path)
-				? $"-n \"{application}\" --args \"{directory}\""
-				: $"-n \"{application}\" --args \"{path}\" --line {line} --column {column}";
+			string arguments;
+			if (string.IsNullOrEmpty(path))
+			{
+				arguments = $"-n \"{application}\" --args \"{workspace}\"";
+			}
+			else
+			{
+				arguments = $"-n \"{application}\" --args \"{workspace}\" -g \"{path}\":{line}:{column}";
+			}
 			
 			var startInfo = ProcessRunner.ProcessStartInfoFor("open", arguments, redirect: false, shell: true);
 #else
-			// On Linux
-			var arguments = string.IsNullOrEmpty(path)
-				? $"\"{directory}\""
-				: $"\"{path}\" --line {line} --column {column}";
+			string arguments;
+			if (string.IsNullOrEmpty(path))
+			{
+				arguments = $"\"{workspace}\"";
+			}
+			else
+			{
+				arguments = $"\"{workspace}\" -g \"{path}\":{line}:{column}";
+			}
 
 			var startInfo = ProcessRunner.ProcessStartInfoFor(application, arguments, redirect: false);
 #endif
