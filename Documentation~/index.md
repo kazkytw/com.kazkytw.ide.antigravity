@@ -1,30 +1,36 @@
-# Code Editor Package for Visual Studio
+# Code Editor Package for Antigravity
 
-## About Visual Studio Editor
+## About Antigravity Editor
 
-The Visual Studio Editor package provides the Unity Editor with support for Unity-specific features from the [Visual Studio Tools for Unity](https://docs.microsoft.com/en-us/visualstudio/gamedev/unity/get-started/visual-studio-tools-for-unity) extension in [Visual Studio](https://visualstudio.microsoft.com/) and the [Unity for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=visualstudiotoolsforunity.vstuc) extension in [Visual Studio Code](https://code.visualstudio.com/). These include IntelliSense auto-complete suggestions, C# editing, and debugging.
+The Antigravity Editor package provides the Unity Editor with support for using Antigravity AI-powered code editor. This includes support for generating C# project files for IntelliSense, auto-discovery of Antigravity installations, and seamless file opening integration.
 
 ## Installation
 
-This package is a built-in package and installed by default.
+Install this package through the Unity Package Manager:
 
-**Note**: If you’re using a version of the Unity Editor before 2019.4, you’ll need to install this package through the package manager.
+1. Open Unity and go to **Window > Package Manager**
+2. Click the **+** button and select **Add package from git URL**
+3. Enter: `https://github.com/kazkytw/com.kazkytw.ide.antigravity.git`
+4. Click **Add**
 
 ## Requirements
 
-This version of the Visual Studio Editor package is compatible with the following versions of the Unity Editor:
+This version of the Antigravity Editor package is compatible with the following versions of the Unity Editor:
 
-* 2019.4 and later
+* Unity 2021.3 and later
 
-To use this package, you must have the following third-party products installed:
+To use this package, you must have Antigravity installed on your system:
 
-* **On Windows**: Visual Studio 2019 version 16.9 or newer with [Visual Studio Tools for Unity](https://docs.microsoft.com/en-us/visualstudio/gamedev/unity/get-started/visual-studio-tools-for-unity) 4.0.9 or newer.
-* **On macOS**: Visual Studio Code with [Unity for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=visualstudiotoolsforunity.vstuc) 0.9.0 or newer.
+* **On Windows**: Antigravity installed at `%LOCALAPPDATA%\Programs\Antigravity\Antigravity.exe`
+* **On macOS**: Antigravity.app in `/Applications`
+* **On Linux**: Antigravity in `/usr/bin/antigravity` or `/usr/local/bin/antigravity`
 
-For more information on using Visual Studio with Unity, refer to Microsoft's [Visual Studio Tools for Unity](https://docs.microsoft.com/en-us/visualstudio/gamedev/unity/get-started/visual-studio-tools-for-unity) documentation.
+## Usage
 
-For more information on using VS Code with Unity, refer to the Visual Studio Code [Unity development with VS code](https://code.visualstudio.com/docs/other/unity) documentation.
+After installing the package:
 
-## Submitting issues
+1. Go to **Edit > Preferences > External Tools**
+2. Select **Antigravity Editor** from the **External Script Editor** dropdown
+3. Unity will now open C# files in Antigravity
 
-This package is maintained by Microsoft and Unity. Submit issues directly from the **Help** menu in Visual Studio (**Help** > **Submit Feedback** > **Report a Problem**) or Visual Studio Code (**Help** > **Report an Issue**). Unity will make this package accessible to the public on GitHub in the future.
+The package will automatically detect your Antigravity installation and configure Unity to use it as the default code editor.
