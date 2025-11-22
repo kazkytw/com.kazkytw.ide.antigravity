@@ -21,3 +21,5 @@ This package is based on:
 - [com.unity.ide.cursor](https://github.com/boxqkrtm/com.unity.ide.cursor) by [@boxqkrtm](https://github.com/boxqkrtm)
 
 **Built Antigravity support package with itself lol**
+
+痾... 目前弄不起來，之後再說ㄅ
